@@ -1,4 +1,3 @@
-
 Automatic Nmap 4 Raspberry PI
 ==================================
 
@@ -21,7 +20,7 @@ Just run:
 ## nmaPi_term.sh
 
 
-Is the same as nmaPi.sh, but for the console. Useful for testing.
+Is the same as nmaPi.sh, but for PC console, is not as automatic. Useful for testing.
 
 ## Running it
 
