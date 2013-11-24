@@ -1,2 +1,39 @@
-nmaPi
-=====
+
+Automatic Nmap 4 Raspberry PI
+==================================
+
+## What
+
+## Dependencies:
+
+* macchanger
+* nmap
+
+## nmaPi.sh
+
+### Running it
+
+Just run:
+
+`./nmaPi.sh`
+
+
+## nmaPi_term.sh
+
+
+Is the same as nmaPi.sh, but for the console. Useful for testing.
+
+## Running it
+
+### Running it
+
+`./nmaPiterm.sh [option]`
+
+#### Options
+                -h - This Help.
+
+                -f - Fast Scan.
+                -d - Deep Scan {Default Option}.
+                -q - Quiet Scan.
+                
+
