@@ -64,3 +64,16 @@ Es lo mismo que el nmaPi.sh, pero para la consola de la Pc, no es tan automátic
                 -f - Escaneo Rápido.
                 -d - Escaneo Profundo {Opción por defecto}.
                 -q - Escaneo Silencioso.
+
+---------
+
+Dentro de los Scrips hay opciones adicionales que podremos editar.
+
+Network Interface: eth0, wlan0
+ifc=wlan0
+Turn Macchanger ON/OFF: 0-1
+mac=0
+Define the range of network: .1/24, .1/16, .*
+range=".1/24"
+range2="-254"
+
