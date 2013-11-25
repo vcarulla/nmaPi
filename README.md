@@ -44,7 +44,7 @@ Solo hacerlo la 1era ves:
 
 * Marcar como ejecutable `chmod +x nmapi.sh`
 * Copiarlo en init.d `cp nmapi.sh /etc/init.d`
-* Y actualizar `update-rc.d miscript defaults`
+* Y actualizar `update-rc.d nmapi.sh defaults`
 
 -Con esto, el scrip arrancará automáticamente en cada booteo-
 
