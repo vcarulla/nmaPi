@@ -1,4 +1,3 @@
-
 Automatic Nmap 4 Raspberry PI
 ==================================
 
@@ -6,7 +5,7 @@ Automatic Nmap 4 Raspberry PI
 
 Es un simple script en bash.
 
-Raspbian + Nmap + NmaPi + WiringPi
+Raspbian + Nmap + WiringPi + NmaPi
 
 Conecte el raspberryPi en una red invitado y el nmap comenzara a mapear todas las computadoras de la red y los puertos que tenga abiertos. Todo esto de forma automática.
 
