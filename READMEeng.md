@@ -40,10 +40,12 @@ The leds are optional, they are just a reference that the process is going well.
 
 ### Running it
 
-Just run:
+Just run a firts time:
 
-`./nmaPi.sh`
-
+Aark as executable  `chmod +x nmapi.sh
+Copy in  init.d `cp nmapi.sh /etc/init.d`
+And update  `update-rc.d miscript defaults`
+-With this, the script  start automatically on each boot-
 
 ## nmaPi_term.sh
 
