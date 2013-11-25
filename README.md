@@ -7,7 +7,8 @@ Es un simple script en bash.
 
 Raspbian + Nmap + WiringPi + NmaPi
 
-Conecte el raspberryPi en una red invitado y el nmap comenzara a mapear todas las computadoras de la red y los puertos que tenga abiertos. Todo esto de forma automática.
+Conecte el raspberryPi en una red invitado y el nmap comenzara a mapear todas las computadoras de la red y los puertos que tenga abiertos. Todo esto de forma automática. Luego un log que sirve para el posterior analisis.
+
 
 Básicamente los pasos son tres. <-- Al menos por ahora.
 
