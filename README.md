@@ -12,11 +12,11 @@ Plug in a raspberryPi into a guest network and the nmap does a mapping of all co
 
 Basically the steps are three <-- At least for now.
 
-1) Assign IP by DHCP
+1) Assign IP by DHCP.
 
-2) Analyzing the network
+2) Analyzing the network.
 
-3) Creating the report
+3) Creating the report.
 
 
 The leds are optional, they are just a reference that the process is going well. But it`s looks cool. :)
@@ -30,7 +30,7 @@ The leds are optional, they are just a reference that the process is going well.
 
 ## Dependencies:
 
-* macchanger
+* macchanger (optional but recommended)
 * nmap
 * WiringPi (for the Leds)
 
