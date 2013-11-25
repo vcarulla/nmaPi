@@ -18,7 +18,7 @@ Básicamente los pasos son tres. <-- Al menos por ahora.
 3) Crea un reporte.
 
 
-Los leds son opcionales, son solo una referencia de que el proceso marcha bien. Pero quedan muy bien :)
+Los leds son opcionales, son solo una referencia de que el proceso marcha bien. Son funcionales y quedan muy bien :)
 
 
 ![](https://lh4.googleusercontent.com/-B8MZPznmNho/UjZvH-zC7fI/AAAAAAAASes/YsjE--DjGP0/s320/Rasp.png)
