@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#---------------------------------------------
+#----------------------------------------------
 #Network Interface: eth0, wlan0 
 ifc=wlan0 
 #Turn Macchanger ON/OFF: 0-1
