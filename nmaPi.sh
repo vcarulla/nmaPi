@@ -2,160 +2,176 @@
 
 #----------------------------------------------
 #Network Interface: eth0, wlan0 
-ifc=wlan0 
-#Turn Macchanger ON/OFF: 0-1
-mac=0
+IFC=wlan0 
+#Turn Macchanger ON/OFF:
+MAC=false
 #Define the range of network: .1/24, .1/16, .*
-range=".1/24" 
-range2="-254"
+RANGE=".1/24" 
 #---------------------------------------------
 
-cat logo
+function powerUpLeds() {
+	echo 17 > /sys/class/gpio/export
+	echo 27 > /sys/class/gpio/export
+	echo 22 > /sys/class/gpio/export
 
-#....Led's Power Up and Test .................
-echo 17 > /sys/class/gpio/export
-echo 27 > /sys/class/gpio/export
-echo 22 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio17/direction
+	echo out > /sys/class/gpio/gpio27/direction
+	echo out > /sys/class/gpio/gpio22/direction
+	
+	return
+}
 
-echo out > /sys/class/gpio/gpio17/direction
-echo out > /sys/class/gpio/gpio27/direction
-echo out > /sys/class/gpio/gpio22/direction
-
-
-echo 1 > /sys/class/gpio/gpio27/value
+function blinkLeds() {
+	echo 1 > /sys/class/gpio/gpio27/value
+	echo 1 > /sys/class/gpio/gpio17/value
+	echo 1 > /sys/class/gpio/gpio22/value
 	sleep 1
-echo 1 > /sys/class/gpio/gpio17/value
+
+	echo 0 > /sys/class/gpio/gpio17/value
+	echo 0 > /sys/class/gpio/gpio22/value
+	echo 0 > /sys/class/gpio/gpio27/value
 	sleep 1
-echo 1 > /sys/class/gpio/gpio22/value
-	sleep 3
 
-echo 0 > /sys/class/gpio/gpio17/value
-echo 0 > /sys/class/gpio/gpio22/value
-echo 0 > /sys/class/gpio/gpio27/value
-#..................................../
+	return
+}
 
-if [ ${mac} -eq 1 ] 
-then
-	echo "- Macchanger ON :)  "
-	ifconfig $ifc down
-	sleep 5
-	macchanger -a $ifc
-	sleep 5
-	ifconfig $ifc up
-	sleep 5
-else
-	echo "- Macchanger OFF :( - "
-fi
+function checkDependecies() {
+	if hash ifconfig 2>/dev/null; then
+			echo "ifconfig found"
+	else
+			echo "ifconfig not found"
+	fi
+	if hash macchanger 2>/dev/null; then
+			echo "macchanger found"
+	else
+			echo "macchanger not found"
+	fi
+	if hash nmap 2>/dev/null; then
+			echo "nmap found"
+	else
+			echo "nmap not found"
+	fi
 
-ip1=$(ip -f inet addr show dev $ifc | sed -n 's/^ *inet *\([.0-9]*\).*/\1/p' | awk -F. ' {print $1"."$2"."$3"."} ' )
-ip2=${ip1}${range}
-echo ""
-echo "- The IP The network ip is: ${ip2} -"
-echo ""
+	exit
+}
+
+function macChanger() {
+	if [ $MAC ] 
+	then
+		echo "- Macchanger ON  :) - "
+		ifconfig $IFC down
+		sleep 5
+		macchanger -a $IFC
+		sleep 5
+		ifconfig $IFC up
+		sleep 5
+	else
+		echo "- Macchanger OFF :( - "
+	fi
+
+	return
+}
+
+function showIpInfo() {
+	ip1=$(ip -f inet addr show dev ${IFC} | sed -n 's/^ *inet *\([.0-9]*\).*/\1/p' | awk -F. ' {print $1"."$2"."$3"."} ' )
+	ip2=${ip1}${RANGE}
+	echo ""
+	echo "- The IP The network ip is: ${ip2} -"
+	echo ""
 	echo 1 > /sys/class/gpio/gpio27/value
 
-case $1 in
-	1) 
-		echo "Making a quick scanning"
-			echo 0 > /sys/class/gpio/gpio17/value ;
-		nmap -T4 -F ${ip2} -oN /tmp/out ;
-			echo 1 > /sys/class/gpio/gpio17/value ;
-		sleep 4
-	;;
+	return
+}
 
-	2) 
-		echo "Making a deep scanning"
-			echo 0 > /sys/class/gpio/gpio17/value ;
-		nmap -T4 -A -V -PE -PS22,25,80,3389 ${ip2} -oN /tmp/out2 ;
-			echo 1 > /sys/class/gpio/gpio17/value ;
-		sleep 4
-	;;
+function init () {
+	cat logo; 
+	powerUpLeds; 
+	blinkLeds; 
+	macChanger; 
+	showIpInfo;
 
-	3) 
-		echo "Making a silent scanning"
-			echo 0 > /sys/class/gpio/gpio17/value ;
-		nmap -sS -sU -T4 -A -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 ${ip2} -oN /tmp/out3 ;
-			echo 1 > /sys/class/gpio/gpio17/value ;
-		sleep 4
-	;;
+	return
+}
 
-	4) 
-		echo "
-			Automatic Nmap for Raspberry Pi
-			-------------------------------
-					by Pimux & Qbit
-			
-		Use ./nmapi.sh [option]
+function quickScan() {
+	init
+	echo "Making a quick scanning"
+	echo 0 > /sys/class/gpio/gpio17/value
+	nmap -T4 -F "$ip2" -oN /tmp/out_scan
+	echo 1 > /sys/class/gpio/gpio17/value
+	sleep 4
+	echo "End Scan"
+	loginScan
 
-		-h - This Help.
+	return
+}
 
-		-f - Fast Scan.
-		-d - Deep Scan {Default Option}.
-		-q - Quiet Scan."
+function deepScan() {
+	init
+	echo "Making a deep scanning"
+	echo 0 > /sys/class/gpio/gpio17/value
+	nmap -T4 -A -V -PE -PS22,25,80,3389 "$ip2" -oN /tmp/out_scan2
+	echo 1 > /sys/class/gpio/gpio17/value
+	sleep 4
+	echo "End Scan"
+	loginScan
 
-		exit
-	;;
+	return
+}
 
-	*) 
-		echo "Invalid Option. Use -h for help
-			" 
-		exit
-	;;
-esac
+function silentScan() {
+	init
+	echo "Making a silent scanning"
+	echo 0 > /sys/class/gpio/gpio17/value
+	nmap -sS -sU -T4 -A -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 "$ip2" -oN /tmp/out_scan3
+	echo 1 > /sys/class/gpio/gpio17/value
+	sleep 4
+	echo "End Scan"
+	loginScan
 
+	return
+}
+
+function help() {
 	echo "
-End Scan"
+	Automatic Nmap for Raspberry Pi
+	-------------------------------
+			by Pimux & ImBittor
 
-echo "Generating log..."
-touch ./map.txt
-date >map.txt
-cat /tmp/out* >> ./map.txt
-rm /tmp/out*
+	Use ./nmapi.sh [option]
+	-f - Fast Scan.
+	-d - Deep Scan {Default Option}.
+	-q - Quiet Scan.
+	-c - Check dependencies"
+	exit
+}
+
+function loginScan() {
+	echo "Generating log..."
+	touch ./map.txt
+	date > map.txt
+	cat /tmp/out_scan* >> ./map.txt
+	rm /tmp/out_scan*
 
 	echo 1 > /sys/class/gpio/gpio22/value
 
-echo "			----Happy Hacking----   :)"
-sleep 1
-
-#-----Confirmation LED's ------------
-echo 1 > /sys/class/gpio/gpio27/value
-echo 1 > /sys/class/gpio/gpio17/value
-echo 1 > /sys/class/gpio/gpio22/value
+	echo "			----Happy Hacking----  :)"
 	sleep 1
 
-echo 0 > /sys/class/gpio/gpio27/value
-echo 0 > /sys/class/gpio/gpio17/value
-echo 0 > /sys/class/gpio/gpio22/value
-	sleep 1
+	counter=1
+	while [ $counter -le 4 ]
+	do
+	blinkLeds
+	((counter++))
+	done
 
-echo 1 > /sys/class/gpio/gpio27/value
-echo 1 > /sys/class/gpio/gpio17/value
-echo 1 > /sys/class/gpio/gpio22/value
-	sleep 1
+	exit
+}
 
-echo 0 > /sys/class/gpio/gpio27/value
-echo 0 > /sys/class/gpio/gpio17/value
-echo 0 > /sys/class/gpio/gpio22/value
-	sleep 1
-
-echo 1 > /sys/class/gpio/gpio27/value
-echo 1 > /sys/class/gpio/gpio17/value
-echo 1 > /sys/class/gpio/gpio22/value
-	sleep 1
-
-echo 0 > /sys/class/gpio/gpio27/value
-echo 0 > /sys/class/gpio/gpio17/value
-echo 0 > /sys/class/gpio/gpio22/value
-	sleep 1
-
-echo 1 > /sys/class/gpio/gpio27/value
-echo 1 > /sys/class/gpio/gpio17/value
-echo 1 > /sys/class/gpio/gpio22/value
-	sleep 1
-
-echo 0 > /sys/class/gpio/gpio27/value
-echo 0 > /sys/class/gpio/gpio17/value
-echo 0 > /sys/class/gpio/gpio22/value
-	sleep 1
-#-----------------------------------/
-exit
+case "$1" in
+	'-f')	quickScan; loginScan;;
+	'-d')	deepScan; loginScan;;
+	'-q')	silentScan; loginScan;;
+	'-c')	checkDependecies;;
+	*		)	help;;
+esac

@@ -1,89 +1,132 @@
 #!/bin/bash
 
-#--------------------------------------------
+#----------------------------------------------
 #Network Interface: eth0, wlan0 
-ifc=wlan0 
-#Turn Macchanger ON/OFF: 1/0
-mac=0
+IFC=wlan0 
+#Turn Macchanger ON/OFF:
+MAC=false
 #Define the range of network: .1/24, .1/16, .*
-range="1/24" 
-range2="1-254"
-#--------------------------------------------
+RANGE=".1/24" 
+#---------------------------------------------
 
-cat logo
+function checkDependecies() {
+	if hash ifconfig 2>/dev/null; then
+			echo "ifconfig found"
+	else
+			echo "ifconfig not found"
+	fi
+	if hash macchanger 2>/dev/null; then
+			echo "macchanger found"
+	else
+			echo "macchanger not found"
+	fi
+	if hash nmap 2>/dev/null; then
+			echo "nmap found"
+	else
+			echo "nmap not found"
+	fi
 
-if [ ${mac} -eq 1 ] 
-then
-	echo "- Macchanger ON :)  "
-	ifconfig $ifc down
-	sleep 5
-	macchanger -a $ifc
-	sleep 5
-	ifconfig $ifc up
-	sleep 5
-else
-	echo "- Macchanger OFF :( - "
-fi
+	exit
+}
 
-ip1=$(ip -f inet addr show dev $ifc | sed -n 's/^ *inet *\([.0-9]*\).*/\1/p' | awk -F. ' {print $1"."$2"."$3"."} ' )
-ip2=${ip1}${range}
-ip3=${ip1}${range2}
-echo ""
-echo "- The ip The network is: ${ip2} | ${ip3} -"
-echo ""
-case $1 in
-	-f) 
-		echo "Making a fast scanning"
-		nmap -T4 -F ${ip2} -oN /tmp/out ;
-		sleep 4
-	;;
+function macChanger() {
+	if [ $MAC ] 
+	then
+		echo "- Macchanger ON  :) - "
+		ifconfig $IFC down
+		sleep 5
+		macchanger -a $IFC
+		sleep 5
+		ifconfig $IFC up
+		sleep 5
+	else
+		echo "- Macchanger OFF :( - "
+	fi
 
-	-d) 
-		echo "Making a deep scanning"
-		nmap -T4 -A -V -PE -PS22,25,80,3389 ${ip2} -oN /tmp/out2 ;
-		sleep 4
-	;;
+	return
+}
 
-	-q) 
-		echo "Making a silent scanning"
-		nmap -sS -sU -T4 -A -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 ${ip2} -oN /tmp/out3 ;
-		sleep 4
-	;;
+function showIpInfo() {
+	ip1=$(ip -f inet addr show dev ${IFC} | sed -n 's/^ *inet *\([.0-9]*\).*/\1/p' | awk -F. ' {print $1"."$2"."$3"."} ' )
+	ip2=${ip1}${RANGE}
+	echo ""
+	echo "- The IP The network ip is: ${ip2} -"
+	echo ""
 
-	-h) 
-		echo "
-			Automatic Nmap for Raspberry Pi
-			-------------------------------
-					by Pimux & Qbit
-			
-		Use ./nmapi.sh [option]
+	return
+}
 
-		-h - This Help.
+function init () {
+	cat logo; 
+	macChanger; 
+	showIpInfo;
 
-		-f - Fast Scan.
-		-d - Deep Scan {Default Option}.
-		-q - Quiet Scan.
-		    "
-		
-		exit
-	;;
+	return
+}
 
-	*) 
-		echo "Invalid Option. Use -h for help" 
-		exit
-			
-	;;
-esac
+function quickScan() {
+	init
+	echo "Making a quick scanning"
+	nmap -T4 -F "$ip2" -oN /tmp/out_scan
+	sleep 4
+	echo "End Scan"
+	loginScan
 
+	return
+}
+
+function deepScan() {
+	init
+	echo "Making a deep scanning"
+	nmap -T4 -A -V -PE -PS22,25,80,3389 "$ip2" -oN /tmp/out_scan2
+	sleep 4
+	echo "End Scan"
+	loginScan
+
+	return
+}
+
+function silentScan() {
+	init
+	echo "Making a silent scanning"
+	nmap -sS -sU -T4 -A -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 "$ip2" -oN /tmp/out_scan3
+	sleep 4
+	echo "End Scan"
+	loginScan
+
+	return
+}
+
+function help() {
 	echo "
-End Scan"
+	Automatic Nmap for Raspberry Pi
+	-------------------------------
+			by Pimux & ImBittor
 
-echo "Generating log..."
-touch ./map.txt
-date >map.txt
-cat /tmp/out* >> ./map.txt
-rm /tmp/out*
+	Use ./nmapi.sh [option]
+	-f - Fast Scan.
+	-d - Deep Scan {Default Option}.
+	-q - Quiet Scan.
+	-c - Check dependencies.
+	"
+	exit
+}
 
-	
-echo "			----Happy Hacking----	:)"
-exit
+function loginScan() {
+	echo "Generating log..."
+	touch ./map.txt
+	date > map.txt
+	cat /tmp/out_scan* >> ./map.txt
+	rm /tmp/out_scan*
+	echo "----Happy Hacking----  :)"
+
+	exit
+}
+
+case "$1" in
+	'-f')	quickScan; loginScan;;
+	'-d')	deepScan; loginScan;;
+	'-q')	silentScan; loginScan;;
+	'-c')	checkDependecies;;
+	*		)	help;;
+esac
