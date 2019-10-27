@@ -65,6 +65,7 @@ Es lo mismo que el nmaPi.sh, pero para la consola de la Pc, no es tan automátic
                 -f - Escaneo Rápido.
                 -d - Escaneo Profundo {Opción por defecto}.
                 -q - Escaneo Silencioso.
+                -c - Verifcar Dependencias.
 
 ---------
 
